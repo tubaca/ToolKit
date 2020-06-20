@@ -16,7 +16,7 @@ class toolButton(QToolButton):
         self.action = krita.instance().action(activeTool[i].action)
         self.setIcon()
         self.setFixedSize(24, 24)
-        self.setIconSize(QSize(24, 24)
+        self.setIconSize(QSize(24, 24))
 
     def onButtonClick():
         self.action().connect.krita.instance().action()
@@ -38,10 +38,7 @@ class kToolBox(QDockWidget):
     def loadButtons(self):
         self.kToolBox.buttons = []
 
-        allTools = Application.resources("tool")
-
-        for index, item in enumerate(toolList[]):
-            buttonLayout = QVBoxLayout()
+        for index, item in Tool():
             button = dropbutton.DropButton(self.mainDialog)
             button.setObjectName(item)
             button.clicked.connect(button.selectTool)
