@@ -8,35 +8,34 @@ from . import mainwindow
 highlightedBack = QColor(86, 128, 194)
 back = QColor(49, 49, 49)
 
-class toolButton(QToolButton):
+class toolButton(QAction):
 
     def __init__(self):
-        super(toolButton, self).__init__(parent)
+        super(toolButton, self).__init__()
 
-        self.action = krita.instance().action(activeTool[i].action)
+        self.action = currentTool[index].action()
         self.setIcon()
         self.setFixedSize(24, 24)
-        self.setIconSize(QSize(24, 24))
 
     def onButtonClick():
         self.action().connect.krita.instance().action()
 
         toolButton.clicked.connect(onButtonClick)
 
-class kToolBox(QDockWidget):
+class kToolBox(QToolBar):
 
-    def __init__(self, parent):
-        super(kToolBox, self).__init__(parent)
+    def __init__(self):
+        super(kToolBox, self).__init__()
 
         self.setWindowTitle(i18n("KToolBox"))
-        mainWidget = QWidget()
+        self.setIconSize(QSize(24, 24))
         layout = QVBoxLayout()
-        mainWidget.setLayout(layout)
-        mainWidget.layout.addButton(toolButton)
+        self.setLayout(layout)
+        self.addAction(toolButton)
         self.loadButtons()
 
     def loadButtons(self):
-        self.kToolBox.buttons = []
+        self.kToolBox.actions = []
 
         for index, item in Tool():
             button = dropbutton.DropButton(self.mainDialog)
