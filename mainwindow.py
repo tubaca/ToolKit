@@ -2,20 +2,9 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from krita import *
-from collections import namedtuple
-from . import kToolbox
 
-class ToolSlot(object):
-    __slots__ = ['currentToolList']
-
-    def __init__(self, t):
-        self.currentToolList = t
-
-    def currentTool(QAction):
-        t.append()
-        pass
 #This is the code in question:
-class Tool(object):
+class Tool():
 
     def __init__(self, action, name, shortcut):
 
@@ -23,61 +12,61 @@ class Tool(object):
         self.text = name
         self.shortcut = shortcut
 
-Tool(transformTool) = "KisToolTransform", "Transform", "(Ctrl + T)"
+currentToolList = []
+
+transformTool = Tool("KisToolTransform", "Transform", "(Ctrl + T)")
 moveTool = Tool("KisToolMove", "Move", "(T)")
 cropTool = Tool("KisToolCrop", "Crop", "(C)")
-currentTool(transformTool)
+currentToolList.append(transformTool)
 
 
 shapeSelectTool = Tool("InteractionTool", "Shape Select", "(V)")
 editShapesTool = Tool("VectorTool", "Edit Shapes", "(T)")
-textTool = Tool("Text", "(T)")
+#textTool = Tool("KisToolText", "Text", "(T)")
 calligraphyTool = Tool("KarbonCalligraphyTool", "Calligraphy", "(T)")
-currentTool(shapeSelectTool)
+currentToolList.append(shapeSelectTool)
 
 #add actions below
 
-brushTool = Tool("Brush", "(T)")
-dynamicBrushTool = Tool("Dynamic Brush", "(T)")
-multiBrushTool = Tool("Multi Brush", "(T)")
-Tool.smartPatchTool("Smart Patch", "(T)")
-currentTool(brushTool)
+brushTool = Tool("KisToolCrop", "Brush", "(T)")
+dynamicBrushTool = Tool("KisToolCrop", "Dynamic Brush", "(T)")
+multiBrushTool = Tool("KisToolCrop", "Multi Brush", "(T)")
+smartPatchTool = Tool("KisToolCrop", "Smart Patch", "(T)")
+currentToolList.append(brushTool)
 
-fillTool = Tool("Fill", "(T)")
-colorPicker = Tool("Color Picker", "(T)")
-lazyBrushTool = Tool("Lazy Brush", "(T)")
-gradientTool = Tool("Gradient", "(T)")
-currentTool(fillTool)
+fillTool = Tool("KisToolCrop", "Fill", "(T)")
+colorPicker = Tool("KisToolCrop", "Color Picker", "(T)")
+lazyBrushTool = Tool("KisToolCrop", "Lazy Brush", "(T)")
+gradientTool = Tool("KisToolCrop", "Gradient", "(T)")
+currentToolList.append(fillTool)
 
-rectangleTool = Tool("Rectangle", "(T)")
-lineTool = Tool("Line", "(T)")
-freehandTool = Tool("Freehand", "(T)")
-ellipseTool = Tool("Ellipse", "(T)")
-polylineTool = Tool("Polygon", "(T)")
-pathTool = Tool("Path", "(T)")
-currentTool(rectangleTool)
+rectangleTool = Tool("KisToolCrop", "Rectangle", "(T)")
+lineTool = Tool("KisToolCrop", "Line", "(T)")
+freehandTool = Tool("KisToolCrop", "Freehand", "(T)")
+ellipseTool = Tool("KisToolCrop", "Ellipse", "(T)")
+polylineTool = Tool("KisToolCrop", "Polygon", "(T)")
+pathTool = Tool("KisToolCrop", "Path", "(T)")
+currentToolList.append(rectangleTool)
 
-rectangularMarqueeTool = Tool("Rectangular Selection", "(T)")
-circularMarqueeTool = Tool("Elliptical Selection", "(T)")
-polygonalLasso = Tool("Polygonal Selection", "(T)")
-lassoTool = Tool("Freehand Selection", "(T)")
-currentTool(rectangularMarqueeTool)
+rectangularMarqueeTool = Tool("KisToolCrop", "Rectangular Selection", "(T)")
+circularMarqueeTool = Tool("KisToolCrop", "Elliptical Selection", "(T)")
+polygonalLasso = Tool("KisToolCrop", "Polygonal Selection", "(T)")
+lassoTool = Tool("KisToolCrop", "Freehand Selection", "(T)")
+currentToolList.append(rectangularMarqueeTool)
 
-contiguousSelectionTool = Tool("Contiguous Selection", "(T)")
-similarSelectionTool = Tool("Similar Selection", "(T)")
-magneticLasso = Tool("Magnetic Selection", "(T)")
-bezierCurveLasso = Tool("Path Selection", "(T)")
-currentTool(contiguousSelectionTool)
+contiguousSelectionTool = Tool("KisToolCrop", "Contiguous Selection", "(T)")
+similarSelectionTool = Tool("KisToolCrop", "Similar Selection", "(T)")
+magneticLasso = Tool("KisToolCrop", "Magnetic Selection", "(T)")
+bezierCurveLasso = Tool("KisToolCrop", "Path Selection", "(T)")
+currentToolList.append(contiguousSelectionTool)
 
-referenceImagesTool = Tool("Reference Images", "(T)")
-assistantTool = Tool("Assistants", "(T)")
-measureTool = Tool("Measure", "(T)")
-currentTool(referenceImagesTool)
+referenceImagesTool = Tool("KisToolCrop", "Reference Images", "(T)")
+assistantTool = Tool("KisToolCrop", "Assistants", "(T)")
+measureTool = Tool("KisToolCrop", "Measure", "(T)")
+currentToolList.append(referenceImagesTool)
 
-panTool = Tool("Pan", "(T)")
-zoomTool = Tool("Zoom", "(T)")
-currentTool(panTool)
+panTool = Tool("KisToolCrop", "Pan", "(T)")
+zoomTool = Tool("KisToolCrop", "Zoom", "(T)")
+currentToolList.append(panTool)
 
-
-
-
+print(currentToolList)
