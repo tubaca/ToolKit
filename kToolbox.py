@@ -87,8 +87,13 @@ class kToolBox(QDockWidget):
         layout = QVBoxLayout()
         mainWidget.setLayout(layout)
         layout.addWidget(toolbar)
-        for i in currentToolList:
-            toolbar.addAction(currentToolList[i])
+
+
+        for Tool in currentToolList:
+            toolbar.addAction(Tool.action)
+            print(Tool.text)
+
+        Tool.action = Krita.instance().action(Tool.action)
 
 @pyqtSlot()
 def on_click(self):
