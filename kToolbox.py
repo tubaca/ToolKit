@@ -80,14 +80,15 @@ class kToolBox(QDockWidget):
         self.setWindowTitle(i18n("KToolBox"))
 
         mainWidget = QWidget(self)
+        toolbar = QToolBar(self)
+        button = QToolButton(self)
 
         self.setWidget(mainWidget)
         layout = QVBoxLayout()
         mainWidget.setLayout(layout)
-        for item in currentToolList:
-            button = QPushButton('Tool', self)
-            button.setToolTip('This is an example button')
-            button.move(100,70)
+        layout.addWidget(toolbar)
+        for i in currentToolList:
+            toolbar.addAction(currentToolList[i])
 
 @pyqtSlot()
 def on_click(self):
