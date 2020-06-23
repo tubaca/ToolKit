@@ -4,102 +4,113 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from krita import *
 
+DOCKER_NAME = 'KToolbox'
+DOCKER_ID = 'kToolbox'
+
 highlightedBack = QColor(86, 128, 194)
 back = QColor(49, 49, 49)
 
-class Tool():
+class Tool(QToolButton):
 
-    def __init__(self, action, name, shortcut):
+    def __init__(self, name, text, icon, category, priority):
+        super().__init__()
+        self.name = name
+        self.text = text
+        self.icon = icon
+        self.category = category
+        self.priority = priority
 
-        self.action = action
-        self.text = name
-        self.shortcut = shortcut
+ToolList = [
 
-currentToolList = []
+Tool("KisToolTransform", "Transform Tool", "krita_tool_transform", "Transform", "0"),
+Tool("KritaTransform/KisToolMove", "Move Tool", "krita_tool_move", "Transform", "1"),
+Tool("KisToolCrop", "Crop Tool", "tool_crop", "Transform", "2"),
 
-transformTool = Tool("KisToolTransform", "Transform", "(Ctrl + T)")
-moveTool = Tool("KisToolMove", "Move", "(T)")
-cropTool = Tool("KisToolCrop", "Crop", "(C)")
-currentToolList.append(transformTool)
+Tool("KoInteractionTool_ID", "Select Shape", "select", "Vector", "0"),
+Tool("SvgTextTool", "Text Tool", "draw-text", "Vector", "1"),
+Tool("PathTool", "Edit Shape Tool", "shape_handling", "Vector", "2"),
+Tool("KarbonCalligraphyTool", "Calligraphy", "calligraphy", "Vector", "3"),
 
+Tool("KritaShape/KisToolBrush", "Freehand Brush", "krita_tool_freehand", "Paint", "0"),
+Tool("KritaShape/KisToolDyna", "Dynamic Brush", "krita_tool_dyna", "Paint", "1"),
+Tool("KritaShape/KisToolMultiBrush", "Multibrush", "krita_tool_multihand", "Paint", "2"),
+Tool("KritaShape/KisToolSmartPatch", "Smart Patch Tool", "krita_tool_smart_patch", "Paint", "3"),
+Tool("KisToolPencil", "Freehand Path", "krita_tool_freehandvector", "Paint", "4"),
 
-shapeSelectTool = Tool("InteractionTool", "Shape Select", "(V)")
-editShapesTool = Tool("VectorTool", "Edit Shapes", "(T)")
-#textTool = Tool("KisToolText", "Text", "(T)")
-calligraphyTool = Tool("KarbonCalligraphyTool", "Calligraphy", "(T)")
-currentToolList.append(shapeSelectTool)
+Tool("KritaFill/KisToolFill", "Fill Tool", "krita_tool_color_fill", "Fill", "0"),
+Tool("KritaSelected/KisToolColorPicker", "Color Picker", "krita_tool_color_picker", "Fill", "1"),
+Tool("KritaShape/KisToolLazyBrush", "Colorize Brush", "krita_tool_lazybrush", "Fill", "2"),
+Tool("KritaFill/KisToolGradient", "Gradient Tool", "krita_tool_gradient", "Fill", "3"),
 
-#add actions below
+Tool("KritaShape/KisToolRectangle", "Rectangle Tool", "krita_tool_rectangle", "Shape", "0"),
+Tool("KritaShape/KisToolLine", "Line Tool", "krita_tool_line", "Shape", "1"),
+Tool("KritaShape/KisToolEllipse", "Ellipse Tool", "krita_tool_ellipse", "Shape", "2"),
+Tool("KisToolPolygon", "Polygon Tool", "krita_tool_polygon", "Shape", "3"),
+Tool("KisToolPolyline", "Polyline Tool", "polyline", "Shape", "4"),
+Tool("KisToolPath", "Bezier Tool", "krita_draw_path", "Shape", "5"),
 
-brushTool = Tool("KisToolCrop", "Brush", "(T)")
-dynamicBrushTool = Tool("KisToolCrop", "Dynamic Brush", "(T)")
-multiBrushTool = Tool("KisToolCrop", "Multi Brush", "(T)")
-smartPatchTool = Tool("KisToolCrop", "Smart Patch", "(T)")
-currentToolList.append(brushTool)
+Tool("KisToolSelectRectangular", "Rectangular Selection", "tool_rect_selection", "Select", "0"),
+Tool("KisToolSelectElliptical", "Elliptical Selection", "tool_elliptical_selection", "Select", "1"),
+Tool("KisToolSelectPolygonal", "Polygonal Selection", "tool_polygonal_selection", "Select", "2"),
+Tool("KisToolSelectPath", "Bezier Selection", "tool_path_selection", "Select", "3"),
 
-fillTool = Tool("KisToolCrop", "Fill", "(T)")
-colorPicker = Tool("KisToolCrop", "Color Picker", "(T)")
-lazyBrushTool = Tool("KisToolCrop", "Lazy Brush", "(T)")
-gradientTool = Tool("KisToolCrop", "Gradient", "(T)")
-currentToolList.append(fillTool)
+Tool("KisToolSelectOutline", "Outline Selection", "tool_outline_selection", "AutoSelect", "0"),
+Tool("KisToolSelectContiguous", "Contiguous Selection", "tool_contiguous_selection", "AutoSelect", "1"),
+Tool("KisToolSelectSimilar", "Similar Selection", "tool_similar_selection", "AutoSelect", "2"),
+Tool("KisToolSelectMagnetic", "Magnetic Selection", "tool_magnetic_selection", "AutoSelect", "3"),
 
-rectangleTool = Tool("KisToolCrop", "Rectangle", "(T)")
-lineTool = Tool("KisToolCrop", "Line", "(T)")
-freehandTool = Tool("KisToolCrop", "Freehand", "(T)")
-ellipseTool = Tool("KisToolCrop", "Ellipse", "(T)")
-polylineTool = Tool("KisToolCrop", "Polygon", "(T)")
-pathTool = Tool("KisToolCrop", "Path", "(T)")
-currentToolList.append(rectangleTool)
+Tool("ToolReferenceImages", "Reference Image Tool", "krita_tool_reference_images", "Reference", "0"),
+Tool("KisAssistantTool", "Assistant Tool", "krita_tool_assistant", "Reference", "1"),
+Tool("KritaShape/KisToolMeasure", "Measure Tool", "krita_tool_measure", "Reference", "2"),
 
-rectangularMarqueeTool = Tool("KisToolCrop", "Rectangular Selection", "(T)")
-circularMarqueeTool = Tool("KisToolCrop", "Elliptical Selection", "(T)")
-polygonalLasso = Tool("KisToolCrop", "Polygonal Selection", "(T)")
-lassoTool = Tool("KisToolCrop", "Freehand Selection", "(T)")
-currentToolList.append(rectangularMarqueeTool)
+Tool("PanTool", "Pan", "tool_pan", "Navigation", "0"),
+Tool("ZoomTool", "Zoom", "tool_zoom", "Navigation", "1"),
 
-contiguousSelectionTool = Tool("KisToolCrop", "Contiguous Selection", "(T)")
-similarSelectionTool = Tool("KisToolCrop", "Similar Selection", "(T)")
-magneticLasso = Tool("KisToolCrop", "Magnetic Selection", "(T)")
-bezierCurveLasso = Tool("KisToolCrop", "Path Selection", "(T)")
-currentToolList.append(contiguousSelectionTool)
+]
 
-referenceImagesTool = Tool("KisToolCrop", "Reference Images", "(T)")
-assistantTool = Tool("KisToolCrop", "Assistants", "(T)")
-measureTool = Tool("KisToolCrop", "Measure", "(T)")
-currentToolList.append(referenceImagesTool)
+class ToolCategory:
+    def __init__(self, name):
+        self.name = name
+        self.tools = {}
 
-panTool = Tool("KisToolCrop", "Pan", "(T)")
-zoomTool = Tool("KisToolCrop", "Zoom", "(T)")
-currentToolList.append(panTool)
+    def addTool(self, tool):
+        self.tools[tool.name] = tool
 
-class kToolBox(QDockWidget):
+class ToolboxDocker(QDockWidget):
 
     def __init__(self):
-        super(kToolBox, self).__init__()
+        super(ToolboxDocker, self).__init__()
 
-        self.setWindowTitle(i18n("KToolBox"))
+        self.categories = {"Transform": ToolCategory("Transform"),
+                           "Vector": ToolCategory("Vector"),
+                           "Paint": ToolCategory("Paint"),
+                           "Shape": ToolCategory("Shape"),
+                           "Select": ToolCategory("Select"),
+                           "AutoSelect": ToolCategory("AutoSelect"),
+                           "Reference": ToolCategory("Reference"),
+                           "Navigation": ToolCategory("Navigation")}
 
-        mainWidget = QWidget(self)
-        toolbar = QToolBar(self)
-        layout = QGridLayout()
+        widget = QWidget()
+        layout = QVBoxLayout()
+        widget.setLayout(layout)
+        self.setWindowTitle(i18n("Tool Kit"))
 
-        self.setWidget(mainWidget)
-        mainWidget.setLayout(layout)
-        layout.addWidget(toolbar)
+        for Tool in ToolList:
+            Tool.setIconSize(QSize(24, 24))
+            Tool.setIcon(Application.icon(Tool.icon))
+            Tool.setObjectName(Tool.name)
+            Tool.setToolTip(i18n(Tool.text))
+            Tool.clicked.connect(self.activateTool)
 
-        toolbar.setOrientation(Qt.Vertical)
+            layout.addWidget(Tool)
 
-        for Tool in currentToolList:
-            toolbar.addAction(Tool.action)
-            print(Tool.text)
-
-        Tool.action = Krita.instance().action("")
+        self.setWidget(widget)
 
     @pyqtSlot()
     def on_click(self):
-        self.connect.paintEvent.drawRectangles(qp)
+        self.connect.paintEvent
 
-        button.clicked.connect(self.on_click)
+        toolbar.actions.triggered.connect(self.on_click)
 
         def paintEvent(self, e):
             qp = QPainter()
@@ -113,17 +124,22 @@ class kToolBox(QDockWidget):
             qp.setBrush(highlightedBack)
             qp.drawRect(10, 15, 90, 60)
 
-    def canvasChanged(self, canvas):
-        pass
-
     def temptopLeft(self, event):
         tempTopLeft = QPoint.event.rect().topLeft();
 
-    def orientationChange(self):
-        if toolbar.orientationChanged(i):
-            toolbar.setOrientation(i)
-            pass
+    def activateTool(self):
+        actionName = self.sender().objectName();
+        ac = Application.action(actionName)
+        print(actionName, ac)
+        if ac:
+            ac.trigger()
 
-Krita.instance().addDockWidgetFactory(DockWidgetFactory("kToolBox", DockWidgetFactoryBase.DockRight, kToolBox))
+    def canvasChanged(self, canvas):
+        pass
 
+instance = Krita.instance()
+dock_widget_factory = DockWidgetFactory(DOCKER_ID,
+                                        DockWidgetFactoryBase.DockRight,
+                                        ToolboxDocker)
 
+instance.addDockWidgetFactory(dock_widget_factory)
