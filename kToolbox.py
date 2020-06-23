@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtCore import *
 from krita import *
 
 highlightedBack = QColor(86, 128, 194)
@@ -81,43 +81,48 @@ class kToolBox(QDockWidget):
 
         mainWidget = QWidget(self)
         toolbar = QToolBar(self)
-        button = QToolButton(self)
+        layout = QGridLayout()
 
         self.setWidget(mainWidget)
-        layout = QVBoxLayout()
         mainWidget.setLayout(layout)
         layout.addWidget(toolbar)
 
+        toolbar.setOrientation(Qt.Vertical)
 
         for Tool in currentToolList:
             toolbar.addAction(Tool.action)
             print(Tool.text)
 
-        Tool.action = Krita.instance().action(Tool.action)
+        Tool.action = Krita.instance().action("")
 
-@pyqtSlot()
-def on_click(self):
-    self.connect.paintEvent.drawRectangles(qp)
+    @pyqtSlot()
+    def on_click(self):
+        self.connect.paintEvent.drawRectangles(qp)
 
-    button.clicked.connect(self.on_click)
+        button.clicked.connect(self.on_click)
 
-    def paintEvent(self, e):
-        qp = QPainter()
-        qp.begin(self)
-        self.drawRectangles(qp)
-        qp.end()
+        def paintEvent(self, e):
+            qp = QPainter()
+            qp.begin(self)
+            self.drawRectangles(qp)
+            qp.end()
 
-    def drawRectangles(self, qp):
-        qp.setPen(highlightedBack)
+        def drawRectangles(self, qp):
+            qp.setPen(highlightedBack)
 
-        qp.setBrush(highlightedBack)
-        qp.drawRect(10, 15, 90, 60)
+            qp.setBrush(highlightedBack)
+            qp.drawRect(10, 15, 90, 60)
 
     def canvasChanged(self, canvas):
         pass
 
     def temptopLeft(self, event):
         tempTopLeft = QPoint.event.rect().topLeft();
+
+    def orientationChange(self):
+        if toolbar.orientationChanged(i):
+            toolbar.setOrientation(i)
+            pass
 
 Krita.instance().addDockWidgetFactory(DockWidgetFactory("kToolBox", DockWidgetFactoryBase.DockRight, kToolBox))
 
