@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=Krita/PythonPlugin
+X-KDE-Library=kToolbox
+X-Python-2-Compatible=false
+X-Krita-Manual=kToolbox_manual.html
+Name=KToolbox
+Comment=Minimal Toolbox
