@@ -136,7 +136,7 @@ class ToolboxDocker(QDockWidget):
 
         subMenu = QMenu('')
         categoryName = self.sender().category
-        for ToolButton.name in self.categories[categoryName]:
+        for objectName in self.categories[categoryName]:
 
             subMenu.addAction(Tool)
 
@@ -144,7 +144,7 @@ class ToolboxDocker(QDockWidget):
 
     def activateTool(self):
 
-        actionName = self.sender().ToolButton.name();
+        actionName = self.sender().objectName();
         ac = Application.action(actionName)
         print(actionName, ac)
         if ac:
