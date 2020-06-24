@@ -10,7 +10,7 @@ DOCKER_ID = 'kToolbox'
 highlightedBack = QColor(86, 128, 194)
 back = QColor(49, 49, 49)
 
-class Tool(QToolButton):
+class ToolButton(QToolButton):
 
     def __init__(self, name, text, icon, category, priority):
         super().__init__()
@@ -22,68 +22,87 @@ class Tool(QToolButton):
 
 ToolList = [
 
-Tool("KisToolTransform", "Transform Tool", "krita_tool_transform", "Transform", "0"),
-Tool("KritaTransform/KisToolMove", "Move Tool", "krita_tool_move", "Transform", "1"),
-Tool("KisToolCrop", "Crop Tool", "tool_crop", "Transform", "2"),
+ToolButton("KisToolTransform", "Transform Tool", "krita_tool_transform", "Transform", "0"),
+ToolButton("KritaTransform/KisToolMove", "Move Tool", "krita_tool_move", "Transform", "1"),
+ToolButton("KisToolCrop", "Crop Tool", "tool_crop", "Transform", "2"),
 
-Tool("KoInteractionTool_ID", "Select Shape", "select", "Vector", "0"),
-Tool("SvgTextTool", "Text Tool", "draw-text", "Vector", "1"),
-Tool("PathTool", "Edit Shape Tool", "shape_handling", "Vector", "2"),
-Tool("KarbonCalligraphyTool", "Calligraphy", "calligraphy", "Vector", "3"),
+ToolButton("InteractionTool", "Select Shape", "select", "Vector", "0"),
+ToolButton("SvgTextTool", "Text Tool", "draw-text", "Vector", "1"),
+ToolButton("PathTool", "Edit Shape Tool", "shape_handling", "Vector", "2"),
+ToolButton("KarbonCalligraphyTool", "Calligraphy", "calligraphy", "Vector", "3"),
 
-Tool("KritaShape/KisToolBrush", "Freehand Brush", "krita_tool_freehand", "Paint", "0"),
-Tool("KritaShape/KisToolDyna", "Dynamic Brush", "krita_tool_dyna", "Paint", "1"),
-Tool("KritaShape/KisToolMultiBrush", "Multibrush", "krita_tool_multihand", "Paint", "2"),
-Tool("KritaShape/KisToolSmartPatch", "Smart Patch Tool", "krita_tool_smart_patch", "Paint", "3"),
-Tool("KisToolPencil", "Freehand Path", "krita_tool_freehandvector", "Paint", "4"),
+ToolButton("KritaShape/KisToolBrush", "Freehand Brush", "krita_tool_freehand", "Paint", "0"),
+ToolButton("KritaShape/KisToolDyna", "Dynamic Brush", "krita_tool_dyna", "Paint", "1"),
+ToolButton("KritaShape/KisToolMultiBrush", "Multibrush", "krita_tool_multihand", "Paint", "2"),
+ToolButton("KritaShape/KisToolSmartPatch", "Smart Patch Tool", "krita_tool_smart_patch", "Paint", "3"),
+ToolButton("KisToolPencil", "Freehand Path", "krita_tool_freehandvector", "Paint", "4"),
 
-Tool("KritaFill/KisToolFill", "Fill Tool", "krita_tool_color_fill", "Fill", "0"),
-Tool("KritaSelected/KisToolColorPicker", "Color Picker", "krita_tool_color_picker", "Fill", "1"),
-Tool("KritaShape/KisToolLazyBrush", "Colorize Brush", "krita_tool_lazybrush", "Fill", "2"),
-Tool("KritaFill/KisToolGradient", "Gradient Tool", "krita_tool_gradient", "Fill", "3"),
+ToolButton("KritaFill/KisToolFill", "Fill Tool", "krita_tool_color_fill", "Fill", "0"),
+ToolButton("KritaSelected/KisToolColorPicker", "Color Picker", "krita_tool_color_picker", "Fill", "1"),
+ToolButton("KritaShape/KisToolLazyBrush", "Colorize Brush", "krita_tool_lazybrush", "Fill", "2"),
+ToolButton("KritaFill/KisToolGradient", "Gradient Tool", "krita_tool_gradient", "Fill", "3"),
 
-Tool("KritaShape/KisToolRectangle", "Rectangle Tool", "krita_tool_rectangle", "Shape", "0"),
-Tool("KritaShape/KisToolLine", "Line Tool", "krita_tool_line", "Shape", "1"),
-Tool("KritaShape/KisToolEllipse", "Ellipse Tool", "krita_tool_ellipse", "Shape", "2"),
-Tool("KisToolPolygon", "Polygon Tool", "krita_tool_polygon", "Shape", "3"),
-Tool("KisToolPolyline", "Polyline Tool", "polyline", "Shape", "4"),
-Tool("KisToolPath", "Bezier Tool", "krita_draw_path", "Shape", "5"),
+ToolButton("KritaShape/KisToolRectangle", "Rectangle Tool", "krita_tool_rectangle", "Shape", "0"),
+ToolButton("KritaShape/KisToolLine", "Line Tool", "krita_tool_line", "Shape", "1"),
+ToolButton("KritaShape/KisToolEllipse", "Ellipse Tool", "krita_tool_ellipse", "Shape", "2"),
+ToolButton("KisToolPolygon", "Polygon Tool", "krita_tool_polygon", "Shape", "3"),
+ToolButton("KisToolPolyline", "Polyline Tool", "polyline", "Shape", "4"),
+ToolButton("KisToolPath", "Bezier Tool", "krita_draw_path", "Shape", "5"),
 
-Tool("KisToolSelectRectangular", "Rectangular Selection", "tool_rect_selection", "Select", "0"),
-Tool("KisToolSelectElliptical", "Elliptical Selection", "tool_elliptical_selection", "Select", "1"),
-Tool("KisToolSelectPolygonal", "Polygonal Selection", "tool_polygonal_selection", "Select", "2"),
-Tool("KisToolSelectPath", "Bezier Selection", "tool_path_selection", "Select", "3"),
+ToolButton("KisToolSelectRectangular", "Rectangular Selection", "tool_rect_selection", "Select", "0"),
+ToolButton("KisToolSelectElliptical", "Elliptical Selection", "tool_elliptical_selection", "Select", "1"),
+ToolButton("KisToolSelectPolygonal", "Polygonal Selection", "tool_polygonal_selection", "Select", "2"),
+ToolButton("KisToolSelectPath", "Bezier Selection", "tool_path_selection", "Select", "3"),
 
-Tool("KisToolSelectOutline", "Outline Selection", "tool_outline_selection", "AutoSelect", "0"),
-Tool("KisToolSelectContiguous", "Contiguous Selection", "tool_contiguous_selection", "AutoSelect", "1"),
-Tool("KisToolSelectSimilar", "Similar Selection", "tool_similar_selection", "AutoSelect", "2"),
-Tool("KisToolSelectMagnetic", "Magnetic Selection", "tool_magnetic_selection", "AutoSelect", "3"),
+ToolButton("KisToolSelectOutline", "Outline Selection", "tool_outline_selection", "AutoSelect", "0"),
+ToolButton("KisToolSelectContiguous", "Contiguous Selection", "tool_contiguous_selection", "AutoSelect", "1"),
+ToolButton("KisToolSelectSimilar", "Similar Selection", "tool_similar_selection", "AutoSelect", "2"),
+ToolButton("KisToolSelectMagnetic", "Magnetic Selection", "tool_magnetic_selection", "AutoSelect", "3"),
 
-Tool("ToolReferenceImages", "Reference Image Tool", "krita_tool_reference_images", "Reference", "0"),
-Tool("KisAssistantTool", "Assistant Tool", "krita_tool_assistant", "Reference", "1"),
-Tool("KritaShape/KisToolMeasure", "Measure Tool", "krita_tool_measure", "Reference", "2"),
+ToolButton("ToolReferenceImages", "Reference Image Tool", "krita_tool_reference_images", "Reference", "0"),
+ToolButton("KisAssistantTool", "Assistant Tool", "krita_tool_assistant", "Reference", "1"),
+ToolButton("KritaShape/KisToolMeasure", "Measure Tool", "krita_tool_measure", "Reference", "2"),
 
-Tool("PanTool", "Pan", "tool_pan", "Navigation", "0"),
-Tool("ZoomTool", "Zoom", "tool_zoom", "Navigation", "1"),
+ToolButton("PanTool", "Pan", "tool_pan", "Navigation", "0"),
+ToolButton("ZoomTool", "Zoom", "tool_zoom", "Navigation", "1"),
 
 ]
 
 class ToolCategory:
+
     def __init__(self, name):
         self.name = name
         self.tools = {}
 
-    def addTool(self, tool):
-        self.tools[tool.name] = tool
+    def addTool(self, ToolButton):
+        self.tools[ToolButton.name] = ToolButton
 
 class ToolboxDocker(QDockWidget):
 
     def __init__(self):
         super(ToolboxDocker, self).__init__()
 
+        self.floating = False
+
+        buttonSize = QSize(14, 14)
+#        rc = QRect(QGuiApplication.screens().at(screen).availableGeometry())
+
+#        if (rc.width() <= 1024):
+#            buttonSize = QSize(12, 12)
+
+#        elif (rc.width() <= 1377):
+#            buttonSize = QSize(14, 14)
+
+#        elif (rc.width() <= 1920 ):
+#            buttonSize = QSize(16, 16)
+
+#        else:
+#            buttonSize = QSize(22, 22)
+
         self.categories = {"Transform": ToolCategory("Transform"),
                            "Vector": ToolCategory("Vector"),
                            "Paint": ToolCategory("Paint"),
+                           "Fill": ToolCategory("Fill"),
                            "Shape": ToolCategory("Shape"),
                            "Select": ToolCategory("Select"),
                            "AutoSelect": ToolCategory("AutoSelect"),
@@ -95,39 +114,35 @@ class ToolboxDocker(QDockWidget):
         widget.setLayout(layout)
         self.setWindowTitle(i18n("Tool Kit"))
 
-        for Tool in ToolList:
-            Tool.setIconSize(QSize(24, 24))
-            Tool.setIcon(Application.icon(Tool.icon))
-            Tool.setObjectName(Tool.name)
-            Tool.setToolTip(i18n(Tool.text))
-            Tool.clicked.connect(self.activateTool)
+        for ToolButton in ToolList:
 
-            layout.addWidget(Tool)
+            self.categories[ToolButton.category].addTool(ToolButton)
+            ToolButton.setIconSize(buttonSize)
+            ToolButton.setIcon(Application.icon(ToolButton.icon))
+            ToolButton.setObjectName(ToolButton.name)
+            ToolButton.setToolTip(i18n(ToolButton.text))
+            ToolButton.setCheckable(True)
+            ToolButton.setAutoRaise(True)
+            ToolButton.setAutoExclusive(True)
+            ToolButton.clicked.connect(self.activateTool)
+            ToolButton.clicked.connect(self.showSubMenu)
+
+            layout.addWidget(ToolButton)
 
         self.setWidget(widget)
 
     @pyqtSlot()
-    def on_click(self):
-        self.connect.paintEvent
+    def showSubMenu(self):
 
-        toolbar.actions.triggered.connect(self.on_click)
+        subMenu = QMenu('')
+        categoryName = self.sender().category
+        for action in self.categories[categoryName]:
 
-        def paintEvent(self, e):
-            qp = QPainter()
-            qp.begin(self)
-            self.drawRectangles(qp)
-            qp.end()
-
-        def drawRectangles(self, qp):
-            qp.setPen(highlightedBack)
-
-            qp.setBrush(highlightedBack)
-            qp.drawRect(10, 15, 90, 60)
-
-    def temptopLeft(self, event):
-        tempTopLeft = QPoint.event.rect().topLeft();
+            action = subMenu.addAction(action[0])
+        self.sender().addMenu(subMenu)
 
     def activateTool(self):
+
         actionName = self.sender().objectName();
         ac = Application.action(actionName)
         print(actionName, ac)
