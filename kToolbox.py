@@ -74,7 +74,7 @@ class ToolCategory:
 
     def __init__(self, name):
         self.name = name
-        self.ToolButtons = {}
+        self.ToolButtons = {} # Each ToolCategory has a dictionary of ToolButton.name : ToolButton items
 
     def addTool(self, ToolButton):
         self.ToolButtons[ToolButton.name] = ToolButton
@@ -126,7 +126,9 @@ class ToolboxDocker(QDockWidget):
 
         widget = QWidget()
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)
+
         self.setWindowTitle(i18n("Tool Kit"))
 
         for ToolButton in ToolList: # Set up button logic
@@ -145,7 +147,11 @@ class ToolboxDocker(QDockWidget):
             ToolButton.clicked.connect(self.activateTool) # Connect activation actions when clicked
             ToolButton.clicked.connect(self.showSubMenu)
 
-            layout.addWidget(ToolButton)
+            if ToolButton.priority == "0":
+
+                layout.addWidget(ToolButton)
+            else:
+                pass
 
         self.setWidget(widget)
 
@@ -154,6 +160,7 @@ class ToolboxDocker(QDockWidget):
     def showSubMenu(self): # Define activation actions
 
         subMenu = QMenu('')
+
         categoryName = self.sender().category
         category = self.categories[categoryName] # get the category
 
@@ -177,9 +184,13 @@ class ToolboxDocker(QDockWidget):
         for action in subMenu.actions(): # show tool icons in submenu
 
             action.setIconVisibleInMenu(True)
-          # here would be 'action.setShortcutVisibleInMenu', which doesn't exist
-        self.sender().setMenu(subMenu)
 
+          # here would be 'action.setShortcutVisibleInMenu', which doesn't exist
+
+        self.sender().setMenu(subMenu) # set the submenu to the clicked button
+
+        mousePosition = QCursor.pos()
+        subMenu.popup(mousePosition + QPoint(10, 0)) # adjust the submenu position to the right
 
     def activateTool(self):
 
