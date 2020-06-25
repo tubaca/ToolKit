@@ -97,7 +97,7 @@ class ToolboxDocker(QDockWidget):
             }
         """)
 
-        buttonSize = QSize(14, 14)
+        buttonSize = QSize(22, 22)
 #        rc = QRect(QGuiApplication.screens().at(screen).availableGeometry())
 #
 #        if (rc.width() <= 1024):
@@ -125,11 +125,18 @@ class ToolboxDocker(QDockWidget):
                            }
 
         widget = QWidget()
+        label = QLabel(" ")
+        label.setFrameShape(QFrame.StyledPanel)
+        label.setFrameShadow(QFrame.Raised)
+        label.setFrameStyle(QFrame.Panel | QFrame.Raised)
+        label.setMinimumWidth(16)
+        label.setFixedHeight(12)
+        self.setTitleBarWidget(label)
+
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)
 
-        self.setWindowTitle(i18n("Tool Kit"))
 
         for ToolButton in ToolList: # Set up button logic
 
