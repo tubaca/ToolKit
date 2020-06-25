@@ -99,22 +99,20 @@ class ToolboxDocker(QDockWidget):
 
         buttonSize = QSize(14, 14)
 #        rc = QRect(QGuiApplication.screens().at(screen).availableGeometry())
-
+#
 #        if (rc.width() <= 1024):
 #            buttonSize = QSize(12, 12)
-
-#        elif (rc.width() <= 1377):
-#            buttonSize = QSize(14, 14)
-
+#
+#        elif (rc.width() <= 1377):             (attempt adaptive button scaling based
+#            buttonSize = QSize(14, 14)                 on screen dimensions)
+#
 #        elif (rc.width() <= 1920 ):
 #            buttonSize = QSize(16, 16)
-
+#
 #        else:
 #            buttonSize = QSize(22, 22)
 
-#State the categories for the tools:
-
-        self.categories = {
+        self.categories = { #State the categories for the tools:
                            "Transform": ToolCategory("Transform"),
                            "Vector": ToolCategory("Vector"),
                            "Paint": ToolCategory("Paint"),
@@ -131,16 +129,12 @@ class ToolboxDocker(QDockWidget):
         widget.setLayout(layout)
         self.setWindowTitle(i18n("Tool Kit"))
 
-#Set up button logic:
-
-        for ToolButton in ToolList:
+        for ToolButton in ToolList: # Set up button logic
 
             self.categories[ToolButton.category].addTool(ToolButton)
             ToolButton.setIconSize(buttonSize)
 
-#Link ToolButton attributes:
-
-            ToolButton.setIcon(Application.icon(ToolButton.icon))
+            ToolButton.setIcon(Application.icon(ToolButton.icon)) # Link ToolButton attributes
             ToolButton.setObjectName(ToolButton.name)
             ToolButton.setToolTip(i18n(ToolButton.text))
 
@@ -148,9 +142,7 @@ class ToolboxDocker(QDockWidget):
             ToolButton.setAutoRaise(True)
             ToolButton.setAutoExclusive(True)
 
-#Connect activation actions when clicked:
-
-            ToolButton.clicked.connect(self.activateTool)
+            ToolButton.clicked.connect(self.activateTool) # Connect activation actions when clicked
             ToolButton.clicked.connect(self.showSubMenu)
 
             layout.addWidget(ToolButton)
@@ -158,10 +150,8 @@ class ToolboxDocker(QDockWidget):
         self.setWidget(widget)
 
 
-
-#Activation actions:
     @pyqtSlot()
-    def showSubMenu(self):
+    def showSubMenu(self): # Define activation actions
 
         subMenu = QMenu('')
         categoryName = self.sender().category
@@ -172,21 +162,29 @@ class ToolboxDocker(QDockWidget):
             toolIcon = QIcon(Application.icon(category.ToolButtons[key].icon))
             toolText = category.ToolButtons[key].text
             toolName = category.ToolButtons[key].name
-            toolAction = QAction(toolIcon, toolText, self)
+            toolAction = QAction(toolIcon, toolText, self) # pykrita doesn't seem to allow shortcuts for QActions,
+                                                           # the following is an attempted workaround
+
+            toolShortcut = QAction(Application.action(toolName)).shortcut() # find the global shortcut
+
+            toolAction.setShortcut(toolShortcut) # add the global shortcut
             toolAction.setObjectName(toolName)
 
-            toolAction.triggered.connect(self.activateTool) #activate menu tool on click
+            toolAction.triggered.connect(self.activateTool) # activate menu tool on click
 
             subMenu.addAction(toolAction) # add the button for this tool
-        subMenu.menuAction().setIconVisibleInMenu(True)
 
+        for action in subMenu.actions(): # show tool icons in submenu
+
+            action.setIconVisibleInMenu(True)
+          # here would be 'action.setShortcutVisibleInMenu', which doesn't exist
         self.sender().setMenu(subMenu)
 
 
     def activateTool(self):
 
-        actionName = self.sender().objectName();
-        ac = Application.action(actionName)
+        actionName = self.sender().objectName(); # get ToolButton name
+        ac = Application.action(actionName) # Search this name in Krita's action list
         print(actionName, ac)
         if ac:
             ac.trigger()
@@ -194,7 +192,7 @@ class ToolboxDocker(QDockWidget):
     def canvasChanged(self, canvas):
         pass
 
-instance = Krita.instance()
+instance = Krita.instance() # Register as Krita Docker
 dock_widget_factory = DockWidgetFactory(DOCKER_ID,
                                         DockWidgetFactoryBase.DockRight,
                                         ToolboxDocker)
