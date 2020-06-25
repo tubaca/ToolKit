@@ -20,6 +20,8 @@ class ToolButton(QToolButton):
         self.category = category
         self.priority = priority
 
+#Tool definitions:
+
 ToolList = [
 
 ToolButton("KisToolTransform", "Transform Tool", "krita_tool_transform", "Transform", "0"),
@@ -72,10 +74,10 @@ class ToolCategory:
 
     def __init__(self, name):
         self.name = name
-        self.tools = {}
+        self.ToolButtons = {}
 
     def addTool(self, ToolButton):
-        self.tools[ToolButton.name] = ToolButton
+        self.ToolButtons[ToolButton.name] = ToolButton
 
 class ToolboxDocker(QDockWidget):
 
@@ -83,6 +85,17 @@ class ToolboxDocker(QDockWidget):
         super(ToolboxDocker, self).__init__()
 
         self.floating = False
+        self.setStyleSheet("""
+            QMenu {
+                background-color: rgb(49, 49, 49);
+                color: rgb(255,255,255);
+                border: 1px solid #000;
+            }
+
+            QMenu::item::selected {
+                background-color: rgb(30,30,30);
+            }
+        """)
 
         buttonSize = QSize(14, 14)
 #        rc = QRect(QGuiApplication.screens().at(screen).availableGeometry())
@@ -99,7 +112,10 @@ class ToolboxDocker(QDockWidget):
 #        else:
 #            buttonSize = QSize(22, 22)
 
-        self.categories = {"Transform": ToolCategory("Transform"),
+#State the categories for the tools:
+
+        self.categories = {
+                           "Transform": ToolCategory("Transform"),
                            "Vector": ToolCategory("Vector"),
                            "Paint": ToolCategory("Paint"),
                            "Fill": ToolCategory("Fill"),
@@ -107,23 +123,33 @@ class ToolboxDocker(QDockWidget):
                            "Select": ToolCategory("Select"),
                            "AutoSelect": ToolCategory("AutoSelect"),
                            "Reference": ToolCategory("Reference"),
-                           "Navigation": ToolCategory("Navigation")}
+                           "Navigation": ToolCategory("Navigation")
+                           }
 
         widget = QWidget()
         layout = QVBoxLayout()
         widget.setLayout(layout)
         self.setWindowTitle(i18n("Tool Kit"))
 
+#Set up button logic:
+
         for ToolButton in ToolList:
 
             self.categories[ToolButton.category].addTool(ToolButton)
             ToolButton.setIconSize(buttonSize)
+
+#Link ToolButton attributes:
+
             ToolButton.setIcon(Application.icon(ToolButton.icon))
             ToolButton.setObjectName(ToolButton.name)
             ToolButton.setToolTip(i18n(ToolButton.text))
+
             ToolButton.setCheckable(True)
             ToolButton.setAutoRaise(True)
             ToolButton.setAutoExclusive(True)
+
+#Connect activation actions when clicked:
+
             ToolButton.clicked.connect(self.activateTool)
             ToolButton.clicked.connect(self.showSubMenu)
 
@@ -131,16 +157,31 @@ class ToolboxDocker(QDockWidget):
 
         self.setWidget(widget)
 
+
+
+#Activation actions:
     @pyqtSlot()
     def showSubMenu(self):
 
         subMenu = QMenu('')
         categoryName = self.sender().category
-        for objectName in self.categories[categoryName]:
+        category = self.categories[categoryName] # get the category
 
-            subMenu.addAction(Tool)
+        for key in category.ToolButtons: # iterate through all the tools in the category
 
-        self.sender().addMenu(subMenu)
+            toolIcon = QIcon(Application.icon(category.ToolButtons[key].icon))
+            toolText = category.ToolButtons[key].text
+            toolName = category.ToolButtons[key].name
+            toolAction = QAction(toolIcon, toolText, self)
+            toolAction.setObjectName(toolName)
+
+            toolAction.triggered.connect(self.activateTool) #activate menu tool on click
+
+            subMenu.addAction(toolAction) # add the button for this tool
+        subMenu.menuAction().setIconVisibleInMenu(True)
+
+        self.sender().setMenu(subMenu)
+
 
     def activateTool(self):
 
