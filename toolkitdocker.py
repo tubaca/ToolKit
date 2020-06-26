@@ -4,8 +4,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from krita import *
 
-DOCKER_NAME = 'KToolbox'
-DOCKER_ID = 'kToolbox'
+DOCKER_NAME = 'ToolKit'
+DOCKER_ID = 'pykrita_toolkit'
 
 highlightedBack = QColor(86, 128, 194)
 back = QColor(49, 49, 49)
@@ -85,7 +85,10 @@ class ToolboxDocker(QDockWidget):
         super(ToolboxDocker, self).__init__()
 
         self.floating = False
+        self.setWindowTitle('Tool Kit')
+								
         self.setStyleSheet("""
+
             QMenu {
                 background-color: rgb(49, 49, 49);
                 color: rgb(255,255,255);
@@ -150,15 +153,18 @@ class ToolboxDocker(QDockWidget):
             ToolButton.setCheckable(True)
             ToolButton.setAutoRaise(True)
             ToolButton.setAutoExclusive(True)
+            ToolButton.setPopupMode(QToolButton.DelayedPopup)
 
-            ToolButton.clicked.connect(self.activateTool) # Connect activation actions when clicked
-            ToolButton.clicked.connect(self.showSubMenu)
-
-            if ToolButton.priority == "0":
+            if ToolButton.priority == "0": # Add the first tool from each category to the Docker
 
                 layout.addWidget(ToolButton)
             else:
                 pass
+
+            ToolButton.clicked.connect(self.activateTool) # Connect activation actions when clicked
+            ButtonTimer = QTimer()
+
+            ToolButton.clicked.connect(self.showSubMenu)
 
         self.setWidget(widget)
 
@@ -167,7 +173,7 @@ class ToolboxDocker(QDockWidget):
     def showSubMenu(self): # Define activation actions
 
         subMenu = QMenu('')
-
+        self.sender().setMenu(subMenu)
         categoryName = self.sender().category
         category = self.categories[categoryName] # get the category
 
@@ -177,11 +183,15 @@ class ToolboxDocker(QDockWidget):
             toolText = category.ToolButtons[key].text
             toolName = category.ToolButtons[key].name
             toolAction = QAction(toolIcon, toolText, self) # pykrita doesn't seem to allow shortcuts for QActions,
-                                                           # the following is an attempted workaround
+                                                           # the following is an attempted workaround {
+            try:
+                Application.action(toolName).shortcut()
 
-            toolShortcut = QAction(Application.action(toolName)).shortcut() # find the global shortcut
+                toolShortcut = Application.action(toolName).shortcut().toString() # find the global shortcut
 
-            toolAction.setShortcut(toolShortcut) # add the global shortcut
+                toolAction.setShortcut(toolShortcut)
+            except:
+                pass
             toolAction.setObjectName(toolName)
 
             toolAction.triggered.connect(self.activateTool) # activate menu tool on click
@@ -194,10 +204,7 @@ class ToolboxDocker(QDockWidget):
 
           # here would be 'action.setShortcutVisibleInMenu', which doesn't exist
 
-        self.sender().setMenu(subMenu) # set the submenu to the clicked button
-
-        mousePosition = QCursor.pos()
-        subMenu.popup(mousePosition + QPoint(10, 0)) # adjust the submenu position to the right
+        subMenu.popup(self.sender().geometry().topRight() + QPoint(0, 118)) # adjust the submenu position to the right
 
     def activateTool(self):
 
@@ -212,7 +219,7 @@ class ToolboxDocker(QDockWidget):
 
 instance = Krita.instance() # Register as Krita Docker
 dock_widget_factory = DockWidgetFactory(DOCKER_ID,
-                                        DockWidgetFactoryBase.DockRight,
+                                        DockWidgetFactoryBase.DockLeft,
                                         ToolboxDocker)
 
 instance.addDockWidgetFactory(dock_widget_factory)

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Service
+ServiceTypes=Krita/PythonPlugin
+X-KDE-Library=toolkitdocker
+X-Python-2-Compatible=false
+X-Krita-Manual=ToolKit_manual.html
+Name=Tool Kit Docker
+Comment=Minimal Toolbox
