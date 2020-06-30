@@ -81,13 +81,31 @@ class ToolCategory:
 
 class Menu(QMenu): # this is the subtools menu
 
+    def __init__(self, parent):
+        super(Menu, self).__init__()
+        self.parent = parent
+
+        self.setMouseTracking
+
     def event(self, event):
 
         if event.type() == QEvent.Show: # if the menu is shown
 
-            self.move(self.parent().mapToGlobal(QPoint(0,0)) + QPoint(self.parent().width(), 0)) # move menu to top-right button corner
+            self.move(self.parent.mapToGlobal(QPoint(0,0)) + QPoint(self.parent.width(), 0)) # move menu to top-right button corner
 
         return super(Menu, self).event(event)
+
+    def mouseMoveEvent(self, event): # this causes the subtool menu to close if exited
+
+        buttonTLC = self.parent.geometry().topLeft() # gets the clicked button's top left corner point
+        menuSize = QSize(self.geometry().size()) # size of subtool menu
+        buttonColumn = QRect(buttonTLC, menuSize) # column bounded by button and menu
+
+        bounds = self.geometry().united(buttonColumn) # add safe area so the cursor doesn't accidentally exit
+
+        if bounds.contains(QCursor.pos()) == False:
+            self.close()
+
 
 class ToolboxDocker(QDockWidget):
 
@@ -171,7 +189,7 @@ class ToolboxDocker(QDockWidget):
             if ToolButton.priority == "0": # Add the first tool from each category to the Docker
 
                 layout.addWidget(ToolButton)
-                subMenu = Menu('', ToolButton)
+                subMenu = Menu(ToolButton)
                 ToolButton.setMenu(subMenu) # this will be the submenu for each main tool
 
             else:
@@ -202,9 +220,6 @@ class ToolboxDocker(QDockWidget):
         if len(Application.documents()) != 0: # prevents the toolbox activating without an open document
 
             subMenu = self.sender().menu() # link the toolbutton menu to this function
-
-            buttonCorner = self.sender().frameGeometry().topRight() # get clicked button's top right corner
-            subMenu.move(buttonCorner)
 
             if subMenu.isEmpty(): # prevents the menu from continuously adding actions every click
 
