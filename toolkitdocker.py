@@ -10,7 +10,6 @@ DOCKER_ID = 'pykrita_toolkit'
 highlightedBack = QColor(86, 128, 194)
 back = QColor(49, 49, 49)
 
-
 class ToolButton(QToolButton):
 
     def __init__(self, name, text, icon, category, priority):
@@ -79,6 +78,16 @@ class ToolCategory:
 
     def addTool(self, ToolButton):
         self.ToolButtons[ToolButton.name] = ToolButton
+
+class Menu(QMenu): # this is the subtools menu
+
+    def event(self, event):
+
+        if event.type() == QEvent.Show: # if the menu is shown
+
+            self.move(self.parent().mapToGlobal(QPoint(0,0)) + QPoint(self.parent().width(), 0)) # move menu to top-right button corner
+
+        return super(Menu, self).event(event)
 
 class ToolboxDocker(QDockWidget):
 
@@ -162,9 +171,8 @@ class ToolboxDocker(QDockWidget):
             if ToolButton.priority == "0": # Add the first tool from each category to the Docker
 
                 layout.addWidget(ToolButton)
-                subMenu = QMenu('') # this will be the submenu for each main tool
-
-                ToolButton.setMenu(subMenu)
+                subMenu = Menu('', ToolButton)
+                ToolButton.setMenu(subMenu) # this will be the submenu for each main tool
 
             else:
                 pass
@@ -194,6 +202,9 @@ class ToolboxDocker(QDockWidget):
         if len(Application.documents()) != 0: # prevents the toolbox activating without an open document
 
             subMenu = self.sender().menu() # link the toolbutton menu to this function
+
+            buttonCorner = self.sender().frameGeometry().topRight() # get clicked button's top right corner
+            subMenu.move(buttonCorner)
 
             if subMenu.isEmpty(): # prevents the menu from continuously adding actions every click
 
@@ -227,6 +238,7 @@ class ToolboxDocker(QDockWidget):
                 for action in subMenu.actions(): # show tool icons in submenu
 
                     action.setIconVisibleInMenu(True)
+
 
     def canvasChanged(self, canvas):
         pass
