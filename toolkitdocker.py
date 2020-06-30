@@ -10,6 +10,7 @@ DOCKER_ID = 'pykrita_toolkit'
 highlightedBack = QColor(86, 128, 194)
 back = QColor(49, 49, 49)
 
+
 class ToolButton(QToolButton):
 
     def __init__(self, name, text, icon, category, priority):
@@ -20,7 +21,7 @@ class ToolButton(QToolButton):
         self.category = category
         self.priority = priority
 
-#Tool definitions:
+#Definitions for each tool:
 
 ToolList = [
 
@@ -85,8 +86,8 @@ class ToolboxDocker(QDockWidget):
         super(ToolboxDocker, self).__init__()
 
         self.floating = False
-        self.setWindowTitle('Tool Kit')
-								
+        self.setWindowTitle('Tool Kit') # window title also acts as the Docker title in Settings > Dockers
+
         self.setStyleSheet("""
 
             QMenu {
@@ -101,6 +102,7 @@ class ToolboxDocker(QDockWidget):
         """)
 
         buttonSize = QSize(22, 22)
+
 #        rc = QRect(QGuiApplication.screens().at(screen).availableGeometry())
 #
 #        if (rc.width() <= 1024):
@@ -128,12 +130,14 @@ class ToolboxDocker(QDockWidget):
                            }
 
         widget = QWidget()
-        label = QLabel(" ")
+        label = QLabel(" ") # label conceals the 'exit' buttons and Docker title
         label.setFrameShape(QFrame.StyledPanel)
         label.setFrameShadow(QFrame.Raised)
         label.setFrameStyle(QFrame.Panel | QFrame.Raised)
         label.setMinimumWidth(16)
         label.setFixedHeight(12)
+        self.setWidget(widget)
+
         self.setTitleBarWidget(label)
 
         layout = QVBoxLayout()
@@ -158,66 +162,77 @@ class ToolboxDocker(QDockWidget):
             if ToolButton.priority == "0": # Add the first tool from each category to the Docker
 
                 layout.addWidget(ToolButton)
+                subMenu = QMenu('') # this will be the submenu for each main tool
+
+                ToolButton.setMenu(subMenu)
+
             else:
                 pass
 
-            ToolButton.clicked.connect(self.activateTool) # Connect activation actions when clicked
-            ButtonTimer = QTimer()
 
-            ToolButton.clicked.connect(self.showSubMenu)
-
-        self.setWidget(widget)
+            ToolButton.pressed.connect(self.activateTool) # Connect activation actions when clicked
+            ToolButton.pressed.connect(self.linkMenu)
 
 
     @pyqtSlot()
-    def showSubMenu(self): # Define activation actions
-
-        subMenu = QMenu('')
-        self.sender().setMenu(subMenu)
-        categoryName = self.sender().category
-        category = self.categories[categoryName] # get the category
-
-        for key in category.ToolButtons: # iterate through all the tools in the category
-
-            toolIcon = QIcon(Application.icon(category.ToolButtons[key].icon))
-            toolText = category.ToolButtons[key].text
-            toolName = category.ToolButtons[key].name
-            toolAction = QAction(toolIcon, toolText, self) # pykrita doesn't seem to allow shortcuts for QActions,
-                                                           # the following is an attempted workaround {
-            try:
-                Application.action(toolName).shortcut()
-
-                toolShortcut = Application.action(toolName).shortcut().toString() # find the global shortcut
-
-                toolAction.setShortcut(toolShortcut)
-            except:
-                pass
-            toolAction.setObjectName(toolName)
-
-            toolAction.triggered.connect(self.activateTool) # activate menu tool on click
-
-            subMenu.addAction(toolAction) # add the button for this tool
-
-        for action in subMenu.actions(): # show tool icons in submenu
-
-            action.setIconVisibleInMenu(True)
-
-          # here would be 'action.setShortcutVisibleInMenu', which doesn't exist
-
-        subMenu.popup(self.sender().geometry().topRight() + QPoint(0, 118)) # adjust the submenu position to the right
-
     def activateTool(self):
 
-        actionName = self.sender().objectName(); # get ToolButton name
-        ac = Application.action(actionName) # Search this name in Krita's action list
-        print(actionName, ac)
-        if ac:
-            ac.trigger()
+        if len(Application.documents()) != 0: # prevents the toolbox activating without an open document
+
+            actionName = self.sender().objectName(); # get ToolButton name
+            ac = Application.action(actionName) # Search this name in Krita's action list
+
+            print(actionName, ac)
+            if ac:
+                ac.trigger() # trigger the action in Krita
+
+            else:
+                pass
+
+    def linkMenu(self):
+
+        if len(Application.documents()) != 0: # prevents the toolbox activating without an open document
+
+            subMenu = self.sender().menu() # link the toolbutton menu to this function
+
+            if subMenu.isEmpty(): # prevents the menu from continuously adding actions every click
+
+                categoryName = self.sender().category
+                category = self.categories[categoryName] # get the category
+
+                for key in category.ToolButtons: # iterate through all the tools in the category
+
+                    toolIcon = QIcon(Application.icon(category.ToolButtons[key].icon))
+                    toolText = category.ToolButtons[key].text
+                    toolName = category.ToolButtons[key].name
+                    toolAction = QAction(toolIcon, toolText, self) # set up initial toolAction
+
+                    # we need to call Krita's shortcut for the toolAction:
+                    try:
+                        Application.action(toolName).shortcut()
+
+                        toolShortcut = Application.action(toolName).shortcut().toString() # find the global shortcut
+
+                        toolAction.setShortcut(toolShortcut)
+
+                    except:
+                        pass
+
+                    toolAction.setObjectName(toolName)
+
+                    toolAction.triggered.connect(self.activateTool) # activate menu tool on click
+
+                    subMenu.addAction(toolAction) # add the button for this tool in the menu
+
+                for action in subMenu.actions(): # show tool icons in submenu
+
+                    action.setIconVisibleInMenu(True)
 
     def canvasChanged(self, canvas):
         pass
 
 instance = Krita.instance() # Register as Krita Docker
+
 dock_widget_factory = DockWidgetFactory(DOCKER_ID,
                                         DockWidgetFactoryBase.DockLeft,
                                         ToolboxDocker)
