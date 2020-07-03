@@ -9,7 +9,7 @@ DOCKER_ID = 'pykrita_toolkit'
 
 highlightedBack = QColor(61, 111, 145)
 back = QColor(49, 49, 49)
-indicator = QPixmap
+
 TKStyleSheet = """
 
             QToolButton:hover { /* when the button is hovered over */
