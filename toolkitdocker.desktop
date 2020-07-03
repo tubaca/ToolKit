@@ -4,5 +4,5 @@ ServiceTypes=Krita/PythonPlugin
 X-KDE-Library=toolkitdocker
 X-Python-2-Compatible=false
 X-Krita-Manual=Manual.html
-Name=Tool Kit
-Comment=Minimal Toolbox
+Name=ToolKit
+Comment=Minimal toolbox for Krita
