@@ -9,6 +9,7 @@ DOCKER_ID = 'pykrita_toolkit'
 
 highlightedBack = QColor(61, 111, 145)
 back = QColor(49, 49, 49)
+indicator = QPixmap
 TKStyleSheet = """
 
             QToolButton:hover { /* when the button is hovered over */
@@ -19,7 +20,7 @@ TKStyleSheet = """
             }
 
             QToolButton::menu-indicator {
-                image: url(menu_indicator.png);
+                image: None;
                 subcontrol-origin: padding;
                 subcontrol-position: bottom right;
             }
@@ -49,6 +50,14 @@ class ToolButton(QToolButton):
         self.isMain = isMain
 
         self.setStyleSheet(TKStyleSheet)
+
+    def enterEvent(self, event):
+        super().enterEvent(event)
+
+        if len(Application.documents()) == 0: # disable buttons before document is visible
+            self.setEnabled(False)
+        else:
+            self.setEnabled(True)
 
 
 #Definitions for each tool:
@@ -269,7 +278,8 @@ class ToolboxDocker(QDockWidget):
                     self.activate_layout.emit() # recall the setupLayout function
 
                 else:
-                    pass
+                    ToolButton.setChecked(True)
+
             else:
                 pass
 
