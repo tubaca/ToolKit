@@ -1,21 +1,7 @@
 from PyQt5.QtWidgets import QToolButton
 from PyQt5.QtGui import QPalette, QColor
-import json
-from os import path
-
-class json_class:
-
-    fileDir = path.dirname(path.realpath(__file__))
-
-    def loadJSON(self):
-        with open(self.fileDir + '/data.json') as jsonFile:
-            data = json.load(jsonFile)
-            return data
-
-jsonMethod = json_class()
 
 class ToolButton(QToolButton):
-
 
     def __init__(self, name, text, icon, category, isMain):
         super().__init__()
@@ -29,12 +15,6 @@ class ToolButton(QToolButton):
         palette.setColor(QPalette.Button, QColor(74, 108, 134))
         self.setPalette(palette)
 
-#    def mouseDoubleClickEvent(self, event):
-#        super().mouseDoubleClickEvent(event)
-
-#        if jsonMethod.loadJSON()["dblClickSubmenu"] == True:
-#            self.setPopupMode(QToolButton.MenuButtonPopup)
-#            self.menu().setVisible(True)
 
     def enterEvent(self, event):
         super().enterEvent(event)
