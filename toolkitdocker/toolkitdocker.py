@@ -13,7 +13,9 @@ DOCKER_NAME = 'ToolKit'
 DOCKER_ID = 'pykrita_toolkit'
 
 class json_class:
+
     fileDir = path.dirname(path.realpath(__file__))
+
     def __init__(self):
         self.existing_data = {}
 
@@ -71,8 +73,8 @@ class Menu(QMenu): # this is the subtools menu
 
     def __init__(self, parent):
         super().__init__()
-        self.parent = parent
 
+        self.parent = parent
         self.setMouseTracking
 
     def showEvent(self, event): # if the menu is shown
@@ -113,6 +115,7 @@ class SettingsWidget(QWidget): # this is the settings tab
         self.label.setText("This is the first tab")
 
         self.settings_ToolList = QListWidget()
+
         for ToolButton in ToolList:
             self.settings_ToolList.addItem(ToolButton.name)
 
@@ -130,10 +133,14 @@ class SettingsWidget(QWidget): # this is the settings tab
         self.subMenuDelay.setSuffix("ms")
 
         self.subButtonBox = QCheckBox()
-        self.subButtonBox.setChecked(jsonMethod.loadJSON()["submenuButton"])
+        self.subButtonBox.setChecked(jsonMethod.existing_data["submenuButton"])
+
+        self.topAlignBox = QCheckBox()
+        self.topAlignBox.setChecked(jsonMethod.existing_data["topAlign"])
 
         self.tab2.layout.addRow(i18n("&Submenu Delay:"), self.subMenuDelay)
         self.tab2.layout.addRow(i18n("&Submenu Button:"), self.subButtonBox)
+        self.tab2.layout.addRow(i18n("&Top Align (needs restart):"), self.topAlignBox)
 
         self.tab2.setLayout(self.tab2.layout)
 
@@ -143,6 +150,7 @@ class SettingsWidget(QWidget): # this is the settings tab
         self.acceptButton.clicked.connect(self.parentWidget().close)
         self.acceptButton.clicked.connect(self.changeDelay)
         self.acceptButton.clicked.connect(self.changeSubButton)
+        self.acceptButton.clicked.connect(self.changeTopAlign)
         self.acceptButton.clicked.connect(jsonMethod.dumpJSON)
 
         self.cancelButton = QPushButton(i18n("Cancel"))
@@ -155,6 +163,7 @@ class SettingsWidget(QWidget): # this is the settings tab
     def changeDelay(self):
         menu_delayValue.value = self.subMenuDelay.value()
         jsonMethod.update_dict({"delayValue": menu_delayValue.value})
+
         for ToolButton in ToolList:
             ToolButton.setStyle(TKStyle("fusion"))
 
@@ -166,22 +175,27 @@ class SettingsWidget(QWidget): # this is the settings tab
                 ToolButton.setPopupMode(QToolButton.MenuButtonPopup)
             else:
                 ToolButton.setPopupMode(QToolButton.DelayedPopup)
+
+    def changeTopAlign(self):
+        jsonMethod.update_dict({"topAlign": self.topAlignBox.isChecked()})
+
         for ToolButton in ToolList:
-            if self.subButtonBox.isChecked() == True:
-                ToolButton.setPopupMode(QToolButton.MenuButtonPopup)
+            if jsonMethod.existing_data["topAlign"] == True:
+                ToolButton.parentWidget().layout().setAlignment(Qt.AlignTop)
             else:
-                ToolButton.setPopupMode(QToolButton.DelayedPopup)
+                pass
 
-SDialog = QDialog()
 
-SDialog.setWindowTitle("ToolKit Settings")
-SDialog.setWindowModality(Qt.ApplicationModal)
+class SDialog(QDialog):
+    def __init__(self):
+        super().__init__()
 
-SLayout = QGridLayout()
-SLayout.addWidget(SettingsWidget(SDialog))
-SDialog.setLayout(SLayout)
+        self.setWindowTitle("ToolKit Settings")
+        self.setWindowModality(Qt.ApplicationModal)
 
-settings_widget = SettingsWidget(SDialog)
+        SLayout = QGridLayout()
+        SLayout.addWidget(SettingsWidget(self))
+        self.setLayout(SLayout)
 
 class ToolboxDocker(QDockWidget):
 
@@ -190,9 +204,7 @@ class ToolboxDocker(QDockWidget):
     def __init__(self):
         super().__init__()
 
-        self.floating = False
         self.setWindowTitle('ToolKit') # window title also acts as the Docker title in Settings > Dockers
-
 
         self.categories = { #State the categories for the tools:
                            "Transform": ToolCategory("Transform"),
@@ -210,6 +222,7 @@ class ToolboxDocker(QDockWidget):
         self.mainToolButtons.setExclusive(True)
 
         self.widget = QWidget()
+
         label = QLabel(" ") # label conceals the 'exit' buttons and Docker title
 
         label.setFrameShape(QFrame.StyledPanel)
@@ -232,13 +245,16 @@ class ToolboxDocker(QDockWidget):
             ToolButton.setIcon(Application.icon(ToolButton.icon)) # Link ToolButton attributes
             ToolButton.setObjectName(ToolButton.name)
             ToolButton.setToolTip(i18n(ToolButton.text))
+            ToolButton.setParent(self)
 
             ToolButton.setStyle(TKStyle("fusion"))
 
             ToolButton.setCheckable(True)
             ToolButton.setAutoRaise(True)
-            if jsonMethod.loadJSON()["submenuButton"] == True:
+
+            if jsonMethod.existing_data["submenuButton"] == True:
                 ToolButton.setPopupMode(QToolButton.MenuButtonPopup)
+
             else:
                 ToolButton.setPopupMode(QToolButton.DelayedPopup)
 
@@ -253,7 +269,7 @@ class ToolboxDocker(QDockWidget):
 
     def contextMenuEvent(self, event):
         super().contextMenuEvent(event)
-        SDialog.exec()
+        SDialog().exec()
 
 
     def activateTool(self):
@@ -325,7 +341,6 @@ class ToolboxDocker(QDockWidget):
 
                 else:
                     ToolButton.setChecked(True)
-
             else:
                 pass
 
@@ -341,17 +356,25 @@ class ToolboxDocker(QDockWidget):
                 layout.addWidget(ToolButton)
 
                 ToolButton.show()
+
                 subMenu = Menu(ToolButton)
                 ToolButton.setMenu(subMenu) # this will be the submenu for each main tool
 
                 ToolButton.menu().aboutToShow.connect(self.linkMenu) # Show submenu when clicked
-                if jsonMethod.loadJSON()["submenuButton"] == True:
-                    ToolButton.menu().aboutToShow.connect(self.linkMenu)
 
             else: # if ToolButton isn't main
                 layout.removeWidget(ToolButton) # remove ToolButton
 
                 ToolButton.close() # close the toolbutton
+
+
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if self.geometry().x() > self.geometry().y():
+            self.layout = QHBoxLayout
+        else:
+            self.layout = QVBoxLayout
 
     def canvasChanged(self, canvas):
         pass
