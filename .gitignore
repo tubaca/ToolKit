@@ -1,0 +1,6 @@
+
+*.pyc
+*.pyc
+*.pyc
+toolkitdocker/__pycache__/toolkitdocker.cpython-38.pyc
+toolkitdocker/__pycache__/tool_list.cpython-38.pyc

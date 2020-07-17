@@ -1,12 +1,21 @@
 from PyQt5.QtWidgets import QToolButton
 from PyQt5.QtGui import QPalette, QColor
 
-class ToolButton(QToolButton):
+from krita import *
 
-    def __init__(self, name, text, icon, category, isMain):
+class ToolButton(QToolButton):
+    """
+    Toolbutton in ToolKit Docker
+    - "actionName" is used when performing tool action in Krita
+    - "toolName" is for the subtool menu description
+    - "icon" creates the toolbutton's displayed icon
+    - "category" determines which subtools the toolbutton belongs with
+    - "isMain" places the toolbutton in ToolKit's main column
+    """
+    def __init__(self, actionName, toolName, icon, category, isMain):
         super().__init__()
-        self.name = name
-        self.text = text
+        self.actionName = actionName
+        self.toolName = toolName
         self.icon = icon
         self.category = category
         self.isMain = isMain
@@ -15,6 +24,16 @@ class ToolButton(QToolButton):
         palette.setColor(QPalette.Button, QColor(74, 108, 134))
         self.setPalette(palette)
 
+        self.setMinimumSize(QSize(30, 30))
+        self.setIconSize(QSize(18, 18))
+
+        self.setCheckable(True)
+        self.setAutoRaise(True)
+
+        # Link ToolButton attributes
+        self.setIcon(Application.icon(self.icon))
+        self.setObjectName(self.actionName)
+        self.setToolTip(i18n(self.toolName))
 
     def enterEvent(self, event):
         super().enterEvent(event)

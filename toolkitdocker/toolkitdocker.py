@@ -1,4 +1,10 @@
 # This Python file uses the following encoding: utf-8
+
+"""
+Constructs the ToolKit Docker
+
+"""
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -7,186 +13,205 @@ from krita import *
 import json
 from os import path
 
-from toolkitdocker.tool_list import ToolList
+from toolkitdocker.json_class import json_class
+from toolkitdocker.toolbuttons import ToolList
+from toolkitdocker.tool_categories import CategoryDict
+from toolkitdocker.flow_layout import FlowLayout
+from toolkitdocker.category_select import CategorySelect
 
-DOCKER_NAME = 'ToolKit'
-DOCKER_ID = 'pykrita_toolkit'
 
-class json_class:
+DOCKER_actionName = "ToolKit"
+DOCKER_ID = "pykrita_toolkit"
 
-    fileDir = path.dirname(path.realpath(__file__))
 
-    def __init__(self):
-        self.existing_data = {}
-
-        with open(self.fileDir + '/data.json') as jsonFile:
-            data = json.load(jsonFile)
-
-        self.existing_data.update(data)
-
-    def loadJSON(self):
-        with open(self.fileDir + '/data.json') as jsonFile:
-            data = json.load(jsonFile)
-            return data
-
-    def update_dict(self, new_data = {}):
-
-        self.existing_data.update(new_data)
-
-    def dumpJSON(self):
-
-        json_object = json.dumps(self.existing_data, sort_keys = True, indent = 4)
-
-        with open(self.fileDir + '/data.json', 'w') as jsonFile:
-            jsonFile.write(json_object)
-
+# We need to create instances of these classes to access their functions
 jsonMethod = json_class()
+category_dictionary = CategoryDict()
 
+
+# Loads the subtool menu delay time set by user
 class delayClass:
+
     def __init__(self, delayValue: int):
         self.value = delayValue
 
+
 menu_delayValue = delayClass(jsonMethod.loadJSON()["delayValue"])
 
+
 class TKStyle(QProxyStyle):
-
-    def styleHint(self, element, option,
-                  widget, returnData):
-
+    """
+    Adjusts how the toolbutton indicator arrow, and delay time are processed by Qt
+    Preferences are loaded from data.json via jsonMethod.loadJSON
+    """
+    def styleHint(self, element, option, widget, returnData):
+        """
+        Changes delay time for toolbutton subtool menu to appear
+        """
         if element == QStyle.SH_ToolButton_PopupDelay:
-            return menu_delayValue.value;
+            return menu_delayValue.value
 
-        return super().styleHint(element, option, widget, returnData);
+        return super().styleHint(element, option, widget, returnData)
+
+    def drawPrimitive(self, element, option, painter, widget):
+        """
+        Changes appearance of toolbutton indicator arrow using QPainter
+        """
+        if element == QStyle.PE_IndicatorArrowDown:
+            # alternate start point for submenu button mode indicator
+            if jsonMethod.loadJSON()["submenuButton"] == True:
+                adjusted_point = QPoint(2, 7)
+
+            else:
+                adjusted_point = QPoint(0, 5)
+
+            triangle = QPainterPath()
+            startPoint = option.rect.bottomRight() - adjusted_point
+            triangle.moveTo(startPoint)
+            triangle.lineTo(startPoint + QPoint(0, 5))
+            triangle.lineTo(startPoint + QPoint(-5, 5))
+            painter.fillPath(triangle, Qt.white)
+
+        else:
+            super().drawPrimitive(element, option, painter, widget)
 
 
-class ToolCategory:
-
-    def __init__(self, name):
-        self.name = name
-        self.ToolButtons = {} # Each ToolCategory has a dictionary of ToolButton.name : ToolButton items
-
-    def addTool(self, ToolButton):
-        self.ToolButtons[ToolButton.name] = ToolButton
-
-
-class Menu(QMenu): # this is the subtools menu
-
+class Menu(QMenu):
+    """
+    Subtools menu for each main toolbutton
+    """
     def __init__(self, parent):
         super().__init__()
 
         self.parent = parent
         self.setMouseTracking
 
-    def showEvent(self, event): # if the menu is shown
+    def showEvent(self, event):
+        """
+        Moves position of menu to top-right toolbutton corner
+        """
         super().showEvent(event)
 
-        self.move(self.parent.mapToGlobal(QPoint(0,0)) + QPoint(self.parent.width(), 0)) # move menu to top-right button corner
+        # Fixes Windows issue of incorrect menu dimensions on secondary displays
+        self.windowHandle().setScreen(self.parent.windowHandle())
 
-    def mouseMoveEvent(self, event): # this causes the subtool menu to close if exited
+        self.move(self.parent.mapToGlobal(QPoint(0,0)) + QPoint(self.parent.width(), 0))
+
+
+    def mouseMoveEvent(self, event):
+        """
+        Causes the subtool menu to close if cursor exits
+        """
         super().mouseMoveEvent(event)
 
-        buttonTLC = self.parent.geometry().topLeft() # gets the clicked button's top left corner point
-        menuSize = QSize(self.geometry().size()) # size of subtool menu
-        buttonColumn = QRect(buttonTLC, menuSize) # column bounded by button and menu
+        # boundary area
+        buttonTLC = self.parent.geometry().topLeft()
+        menuSize = QSize(self.geometry().size())
+        buttonColumn = QRect(buttonTLC, menuSize)
 
-        bounds = self.geometry().united(buttonColumn) # add safe area so the cursor doesn't accidentally exit
+        bounds = self.geometry().united(buttonColumn)
 
         if bounds.contains(QCursor.pos()) == False:
             self.close()
 
 
-class SettingsWidget(QWidget): # this is the settings tab
-
+class SettingsWidget(QWidget):
+    """
+    Settings interface widget for the user to alter ToolKit layout, and toolbutton properties
+    """
     def __init__(self, parent):
         super(SettingsWidget, self).__init__(parent)
-        self.layout = QGridLayout(self)
+        self.layout = QVBoxLayout(self)
 
+        # Create settings tabs
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
-        self.tabs.resize(300, 200)
+
+        self.tab1.layout = QVBoxLayout(self)
+        self.tab2.layout = QFormLayout(self)
 
         self.tabs.addTab(self.tab1, "Layout")
         self.tabs.addTab(self.tab2, "General")
 
-        self.tab1.layout = QVBoxLayout(self)
-
-        self.label = QLabel()
-        self.label.setText("This is the first tab")
-
-        self.settings_ToolList = QListWidget()
-
-        for ToolButton in ToolList:
-            self.settings_ToolList.addItem(ToolButton.name)
-
-        self.category_Dropdown = QComboBox()
-        self.tab1.layout.addWidget(self.label)
+        """
+        Set up first tab
+        """
+        # Interface for rearranging toolbutton layout
+        self.category_select = CategorySelect()
+        self.tab1.layout.addWidget(self.category_select)
 
         self.tab1.setLayout(self.tab1.layout)
 
-        self.tab2.layout = QFormLayout(self)
-
-        self.subMenuDelay = QSpinBox() # user input for submenu delay time
+        """
+        Set up second tab
+        """
+        # Create submenu delay time input
+        self.subMenuDelay = QSpinBox()
         self.subMenuDelay.setRange(0, 1000)
         self.subMenuDelay.setSingleStep(100)
         self.subMenuDelay.setValue(menu_delayValue.value)
         self.subMenuDelay.setSuffix("ms")
 
+        # Create submenu button mode toggle
         self.subButtonBox = QCheckBox()
         self.subButtonBox.setChecked(jsonMethod.existing_data["submenuButton"])
-
-        self.topAlignBox = QCheckBox()
-        self.topAlignBox.setChecked(jsonMethod.existing_data["topAlign"])
-
+        
         self.tab2.layout.addRow(i18n("&Submenu Delay:"), self.subMenuDelay)
         self.tab2.layout.addRow(i18n("&Submenu Button:"), self.subButtonBox)
-        self.tab2.layout.addRow(i18n("&Top Align (needs restart):"), self.topAlignBox)
 
         self.tab2.setLayout(self.tab2.layout)
 
         self.layout.addWidget(self.tabs)
 
+        """
+        Add "cancel" and "accept" buttons to main layout
+        """
+        # Create "OK" button
         self.acceptButton = QPushButton(i18n("OK"))
         self.acceptButton.clicked.connect(self.parentWidget().close)
         self.acceptButton.clicked.connect(self.changeDelay)
-        self.acceptButton.clicked.connect(self.changeSubButton)
-        self.acceptButton.clicked.connect(self.changeTopAlign)
+        self.acceptButton.clicked.connect(self.changeSubButton)        
         self.acceptButton.clicked.connect(jsonMethod.dumpJSON)
 
+        # Create "Cancel" button
         self.cancelButton = QPushButton(i18n("Cancel"))
         self.cancelButton.clicked.connect(self.parentWidget().close)
 
-        self.layout.addWidget(self.acceptButton)
-        self.layout.addWidget(self.cancelButton)
+        self.buttons_footer = QHBoxLayout()
+
+        # Add the buttons to layout
+        self.buttons_footer.addItem(QSpacerItem(80, 0))
+        self.buttons_footer.addWidget(self.acceptButton)
+        self.buttons_footer.addWidget(self.cancelButton)
+
+        self.layout.addLayout(self.buttons_footer)
+
         self.setLayout(self.layout)
 
+
     def changeDelay(self):
+        """
+        Receives and updates the new subtool menu delay value
+        """
         menu_delayValue.value = self.subMenuDelay.value()
         jsonMethod.update_dict({"delayValue": menu_delayValue.value})
 
         for ToolButton in ToolList:
             ToolButton.setStyle(TKStyle("fusion"))
 
+
     def changeSubButton(self):
+        """
+        Receives and updates the subtool menu mode
+        """
         jsonMethod.update_dict({"submenuButton": self.subButtonBox.isChecked()})
-
-        for ToolButton in ToolList:
-            if self.subButtonBox.isChecked() == True:
-                ToolButton.setPopupMode(QToolButton.MenuButtonPopup)
-            else:
-                ToolButton.setPopupMode(QToolButton.DelayedPopup)
-
-    def changeTopAlign(self):
-        jsonMethod.update_dict({"topAlign": self.topAlignBox.isChecked()})
-
-        for ToolButton in ToolList:
-            if jsonMethod.existing_data["topAlign"] == True:
-                ToolButton.parentWidget().layout().setAlignment(Qt.AlignTop)
-            else:
-                pass
 
 
 class SDialog(QDialog):
+    """
+    Dialog container for Settings interface widget
+    """
     def __init__(self):
         super().__init__()
 
@@ -194,36 +219,40 @@ class SDialog(QDialog):
         self.setWindowModality(Qt.ApplicationModal)
 
         SLayout = QGridLayout()
+
+        # Add Settings interface widget
         SLayout.addWidget(SettingsWidget(self))
+
         self.setLayout(SLayout)
 
-class ToolboxDocker(QDockWidget):
 
+class ToolKitDocker(QDockWidget):
+    """
+    Main ToolKit Docker body, contains the main toolbuttons with subtool menus
+    """
     activate_layout = pyqtSignal()
 
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('ToolKit') # window title also acts as the Docker title in Settings > Dockers
+        self.setFloating(False)
+        # Set Docker title in Settings > Dockers
+        self.setWindowTitle('ToolKit')
 
-        self.categories = { #State the categories for the tools:
-                           "Transform": ToolCategory("Transform"),
-                           "Vector": ToolCategory("Vector"),
-                           "Paint": ToolCategory("Paint"),
-                           "Fill": ToolCategory("Fill"),
-                           "Shape": ToolCategory("Shape"),
-                           "Select": ToolCategory("Select"),
-                           "AutoSelect": ToolCategory("AutoSelect"),
-                           "Reference": ToolCategory("Reference"),
-                           "Navigation": ToolCategory("Navigation")
-                           }
-
+        # Create button group to handle main toolbuttons
         self.mainToolButtons = QButtonGroup()
         self.mainToolButtons.setExclusive(True)
 
+        # Create settings dialog container
+        self.dialog = SDialog()
+
+        # Paint the ToolKitlayout when settings dialog is finalised
+        self.dialog.children()[0].acceptButton.clicked.connect(self.setupLayout)
+
         self.widget = QWidget()
 
-        label = QLabel(" ") # label conceals the 'exit' buttons and Docker title
+        # Conceal the 'exit' buttons and Docker title with QLabel
+        label = QLabel(" ")
 
         label.setFrameShape(QFrame.StyledPanel)
         label.setFrameShadow(QFrame.Raised)
@@ -234,78 +263,79 @@ class ToolboxDocker(QDockWidget):
         self.setWidget(self.widget)
         self.setTitleBarWidget(label)
 
-        layout = QGridLayout()
-
+        """
+        Initialise ToolKit Docker layout and toolbuttons
+        """
+        layout = FlowLayout()
         self.widget.setLayout(layout)
 
-        for ToolButton in ToolList: # Set up button logic
+        for ToolButton in ToolList:
 
-            self.categories[ToolButton.category].addTool(ToolButton)
+            category_dictionary.categories[ToolButton.category].addTool(ToolButton)
 
-            ToolButton.setIcon(Application.icon(ToolButton.icon)) # Link ToolButton attributes
-            ToolButton.setObjectName(ToolButton.name)
-            ToolButton.setToolTip(i18n(ToolButton.text))
             ToolButton.setParent(self)
 
             ToolButton.setStyle(TKStyle("fusion"))
 
-            ToolButton.setCheckable(True)
-            ToolButton.setAutoRaise(True)
+            ToolButton.clicked.connect(self.activateTool)
 
-            if jsonMethod.existing_data["submenuButton"] == True:
-                ToolButton.setPopupMode(QToolButton.MenuButtonPopup)
-
-            else:
-                ToolButton.setPopupMode(QToolButton.DelayedPopup)
-
-            ToolButton.pressed.connect(self.activateTool) # Activate when clicked
-
-
-        self.activate_layout.connect(self.setupLayout) # Paint the layout
+        # The rest of the layout setup is handled by the "setupLayout" function
+        self.activate_layout.connect(self.setupLayout)
         self.activate_layout.emit()
 
 #        if len(Application.documents()) != 0: # attempted canvas-only mode
 #            QAction(Application.action("view_show_canvas_only")).triggered.connect(self.layout.removeWidget(widget))
 
     def contextMenuEvent(self, event):
+        """
+        Shows the Settings dialog on right-click of ToolKit Docker
+        """
         super().contextMenuEvent(event)
-        SDialog().exec()
+
+        self.dialog.exec()
 
 
     def activateTool(self):
-
-        actionName = self.sender().objectName() # get ToolButton name
-        ac = Application.action(actionName) # Search this name in Krita's action list
+        """
+        Registers and performs the toolbutton's action in Krita
+        """
+        actionName = self.sender().objectName()
+        ac = Application.action(actionName) 
 
         print(actionName, ac)
         if ac:
-            ac.trigger() # trigger the action in Krita
+            ac.trigger()
 
         else:
             pass
 
 
     def linkMenu(self):
+        """
+        Populates the toolbutton's menu with subtools from its category
+        """
+        subMenu = self.sender()
 
-        subMenu = self.sender() # link the toolbutton menu to this function
-
-        if subMenu.isEmpty(): # prevents the menu from continuously adding actions every click
+        # Prevent the menu from continuously adding actions every click
+        if subMenu.isEmpty():
 
             categoryName = self.sender().parent.category
-            category = self.categories[categoryName] # get the category
+            category = category_dictionary.categories[categoryName]
 
-            for key in category.ToolButtons: # iterate through all the tools in the category
+            # Iterate through all the tools in the category
+            for key in category.ToolButtons:
 
                 toolIcon = QIcon(Application.icon(category.ToolButtons[key].icon))
-                toolText = category.ToolButtons[key].text
-                toolName = category.ToolButtons[key].name
+                toolText = category.ToolButtons[key].toolName
+                toolName = category.ToolButtons[key].actionName
                 toolAction = QAction(toolIcon, toolText, self) # set up initial toolAction
 
-                # we need to call Krita's shortcut for the toolAction:
+                # We need to call Krita's shortcut for the toolAction:
                 try:
                     Application.action(toolName).shortcut()
 
-                    toolShortcut = Application.action(toolName).shortcut().toString() # find the global shortcut
+                    # Find the global shortcut
+                    toolShortcut = Application.action(toolName).shortcut().toString()
 
                     toolAction.setShortcut(toolShortcut)
 
@@ -326,10 +356,13 @@ class ToolboxDocker(QDockWidget):
 
 
     def swapToolButton(self):
-        actionName = self.sender().objectName()
+        """
+        Swaps the clicked subtool with the main toolbutton
+        """
+        subtool_actionName = self.sender().objectName()
 
         for ToolButton in ToolList:
-            if ToolButton.name == actionName: # for the selected subtool
+            if ToolButton.actionName == subtool_actionName:
 
                 mainToolButton = self.sender().parentWidget() # the current main tool shown
 
@@ -343,6 +376,7 @@ class ToolboxDocker(QDockWidget):
                     ToolButton.setChecked(True)
             else:
                 pass
+
 
     @pyqtSlot()
     def setupLayout(self):
@@ -358,23 +392,28 @@ class ToolboxDocker(QDockWidget):
                 ToolButton.show()
 
                 subMenu = Menu(ToolButton)
+                subMenu.setWindowFlags(Qt.Popup)
+
                 ToolButton.setMenu(subMenu) # this will be the submenu for each main tool
 
                 ToolButton.menu().aboutToShow.connect(self.linkMenu) # Show submenu when clicked
+
+                if jsonMethod.existing_data["submenuButton"] == True:
+                    ToolButton.setPopupMode(QToolButton.MenuButtonPopup)
+
+                else:
+                    ToolButton.setPopupMode(QToolButton.DelayedPopup)
 
             else: # if ToolButton isn't main
                 layout.removeWidget(ToolButton) # remove ToolButton
 
                 ToolButton.close() # close the toolbutton
 
-
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        if self.geometry().x() > self.geometry().y():
-            self.layout = QHBoxLayout
+        if jsonMethod.loadJSON()["submenuButton"] == True:
+            self.setMinimumWidth(40)
         else:
-            self.layout = QVBoxLayout
+            self.setMinimumWidth(0)
+
 
     def canvasChanged(self, canvas):
         pass
@@ -384,6 +423,6 @@ instance = Krita.instance() # Register as Krita Docker
 
 dock_widget_factory = DockWidgetFactory(DOCKER_ID,
                                         DockWidgetFactoryBase.DockLeft,
-                                        ToolboxDocker)
+                                        ToolKitDocker)
 
 instance.addDockWidgetFactory(dock_widget_factory)
