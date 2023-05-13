@@ -62,7 +62,7 @@ ToolButton("KritaShape/KisToolSmartPatch", "Smart Patch Tool", "krita_tool_smart
 ToolButton("KisToolPencil", "Freehand Path", "krita_tool_freehandvector", "Paint", "0"),
 
 ToolButton("KritaFill/KisToolFill", "Fill Tool", "krita_tool_color_fill", "Fill", "1"),
-ToolButton("KritaSelected/KisToolColorPicker", "Color Picker", "krita_tool_color_picker", "Fill", "0"),
+ToolButton("KritaSelected/KisToolColorSampler", "Color Sampler", "krita_tool_color_sampler", "Fill", "0"),
 ToolButton("KritaShape/KisToolLazyBrush", "Colorize Brush", "krita_tool_lazybrush", "Fill", "0"),
 ToolButton("KritaFill/KisToolGradient", "Gradient Tool", "krita_tool_gradient", "Fill", "0"),
 
